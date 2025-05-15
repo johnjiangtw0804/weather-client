@@ -1,0 +1,55 @@
+# --- C++ build artifacts ---
+*.o
+*.obj
+*.so
+*.a
+*.dll
+*.lib
+*.exe
+*.out
+
+# --- Build directories ---
+build/
+bin/
+dist/
+Debug/
+Release/
+
+# --- CMake ---
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# --- IDE and editor files ---
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# --- MacOS ---
+.DS_Store
+
+# --- Logs and temp files ---
+*.log
+*.tmp
+
+# --- Core dumps ---
+core
+*.core
+
+# vcpkg build directories and packages
+vcpkg_installed/
+vcpkg/buildtrees/
+vcpkg/packages/
+vcpkg/downloads/
+
+# vcpkg artifacts
+vcpkg/installed/
+
+# vcpkg logs
+vcpkg/vcpkg*.log
+# --- Generated files ---
+*.gch
+*.pch
+
