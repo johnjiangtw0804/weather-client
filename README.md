@@ -37,7 +37,7 @@ vcpkg new --application
   "name": "weather-client",
   "version-string": "0.1.0",
   "dependencies": [
-    "curlpp"
+    "curlpp"...
   ]
 }
 
@@ -77,12 +77,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 # Find curlpp
-find_package(unofficial-curlpp CONFIG REQUIRED)
+find_package(unofficial-curlpp CONFIG REQUIRED) ...
 
 add_executable(WeatherClient main.cpp)
 
 # Link curlpp
-target_link_libraries(WeatherClient PRIVATE unofficial::curlpp::curlpp)
+target_link_libraries(WeatherClient PRIVATE unofficial::curlpp::curlpp) ...
 ```
 
 ### 5. Lastly, Configure and Build
