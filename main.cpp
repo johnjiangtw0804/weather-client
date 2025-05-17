@@ -57,7 +57,14 @@ int main(int argc, char** argv) {
         myRequest.setOpt(new curlpp::options::WriteStream( &response));
 
         myRequest.perform();
+
         std:: cout << response.str() << std::endl;
+
+
+        /**
+         * json parser
+         */
+
     } catch(curlpp::RuntimeError & e) {
 		std::cerr << e.what() << std::endl;
         exit(1);
