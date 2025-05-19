@@ -1,13 +1,15 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-
 #include <curlpp/cURLpp.hpp>
 #include <curlpp/Easy.hpp>
 #include <curlpp/Options.hpp>
 #include <sstream>
-
 #include <cxxopts.hpp>
+
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 /**
  *  一個很簡單的 WeatherClient CLI 去用來查詢當下天氣，
@@ -26,14 +28,14 @@ int main(int argc, char** argv) {
         ("lat,latitude", "Latitude (e.g., 37.7749)", cxxopts::value<std::string>())
         ("h,help", "Print help");
 
-    auto arguments = options.parse(argc, argv);
+    cxxopts::ParseResult arguments = options.parse(argc, argv);
 
-    // if the arguments is not empty and we see some unknown options, we should exit right away
     if (arguments.count("help") || arguments.unmatched().size() > 0) {
         std::cout << options.help() << std::endl;
         exit(0);
     }
 
+    curlpp::Cleanup cleanup;
     bool use_ip = arguments["ip"].as<int>() == 1 ? true : false;
     if (!use_ip) {
         if (arguments["lon"].count() != 1 || arguments["lat"].count() != 1) {
@@ -45,35 +47,52 @@ int main(int argc, char** argv) {
         std::cout << "Using coordinates: (" << g_lat << ", " << g_lon << ")\n";
     } else {
         std::cout << "Using IP-based geolocation.\n";
+        // get IP
+        curlpp::Easy IPRequest;
+        std::ostringstream ip_response;
+        IPRequest.setOpt(new curlpp::options::Url("https://api.ipify.org?format=json"));
+        IPRequest.setOpt(new curlpp::options::WriteStream(&ip_response));
+        IPRequest.perform();
+        json data = json::parse(ip_response.str());
+        std::string ip = data["ip"];
+
+        std::cout << "Current IP address is: " << ip << std::endl;
+
+        // IP to lat and long
+        curlpp::Easy LongLatRequest;
+        std::ostringstream loc_response;;
+        LongLatRequest.setOpt(curlpp::options::Url("http://ip-api.com/json/" + ip));
+        LongLatRequest.setOpt(curlpp::options::WriteStream(&loc_response));
+        LongLatRequest.perform();
+
+        data = json::parse(loc_response.str());
+        g_lon = std::to_string((data["lon"].get<double>()));
+        g_lat = std::to_string((data["lon"].get<double>()));
+        std::cout << "Using coordinates: (" << g_lat << ", " << g_lon << ")\n";
     }
 
     try {
         curlpp::Easy myRequest;
         std::ostringstream response;
 
-        std::string API_URL = OPEN_METEO_BASE_URL + "latitude=" + g_lat + "&longitude=" + g_lon +
-         "&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m";
-        myRequest.setOpt(new curlpp::options::Url(API_URL));
+        myRequest.setOpt(new curlpp::options::Url(OPEN_METEO_BASE_URL + "latitude=" + g_lat + "&longitude=" + g_lon +
+                                                "&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m"));
         myRequest.setOpt(new curlpp::options::WriteStream( &response));
 
         myRequest.perform();
 
-        std:: cout << response.str() << std::endl;
-
-
         /**
          * json parser
          */
+        // json data = json::parse(response);
+
 
     } catch(curlpp::RuntimeError & e) {
 		std::cerr << e.what() << std::endl;
         exit(1);
-	}
-
-	catch(curlpp::LogicError & e) {
+	} catch(curlpp::LogicError & e) {
 		std::cerr << e.what() << std::endl;
         exit(1);
 	}
-
     return 0;
 }
