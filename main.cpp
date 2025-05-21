@@ -67,26 +67,21 @@ int main(int argc, char** argv) {
 
         data = json::parse(loc_response.str());
         g_lon = std::to_string((data["lon"].get<double>()));
-        g_lat = std::to_string((data["lon"].get<double>()));
+        g_lat = std::to_string((data["lat"].get<double>()));
         std::cout << "Using coordinates: (" << g_lat << ", " << g_lon << ")\n";
     }
 
     try {
         curlpp::Easy myRequest;
-        std::ostringstream response;
+        std::ostringstream weather_response;
 
         myRequest.setOpt(new curlpp::options::Url(OPEN_METEO_BASE_URL + "latitude=" + g_lat + "&longitude=" + g_lon +
                                                 "&current=temperature_2m,wind_speed_10m&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m"));
-        myRequest.setOpt(new curlpp::options::WriteStream( &response));
-
+        myRequest.setOpt(new curlpp::options::WriteStream(&weather_response));
         myRequest.perform();
-
-        /**
-         * json parser
-         */
-        // json data = json::parse(response);
-
-
+        std::cout << weather_response.str() << std::endl;
+        json data = json::parse(weather_response.str());
+        // std::cout << "current weather in your area is " + data[]
     } catch(curlpp::RuntimeError & e) {
 		std::cerr << e.what() << std::endl;
         exit(1);
